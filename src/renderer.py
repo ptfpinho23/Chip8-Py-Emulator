@@ -1,3 +1,2 @@
-
-class Renderer():
+class Renderer:
     pass

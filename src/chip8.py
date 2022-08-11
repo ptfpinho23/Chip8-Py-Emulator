@@ -1,12 +1,15 @@
+from typing import List
+
+from cpu import OPCODE_EXECUTION
 from renderer import Renderer
-from utils import Execution_state
+from utils import DEFAULT_EXECUTION_SPEED, DEFAULT_START_ADDR, ExecutionState
 
 
 class Chip8:
     rendeder: Renderer
-    memory: []
-    state: Execution_state
-    registry: []
+    memory: List[int]
+    state: ExecutionState
+    registry: List[int]
     current_memory_address = int
     program_counter: int
     delay_timer: int
@@ -19,15 +22,18 @@ class Chip8:
         self.sound_interface = sound_interface
         self.memory = bytearray(4096)
         self.registry = bytearray(16)
-        self.state = Execution_state.READY.value
-        self.execution_speed = 10
-        self.program_counter = 0x200
+        self.state = ExecutionState.READY.value
+        self.execution_speed = DEFAULT_EXECUTION_SPEED
+        self.program_counter = DEFAULT_START_ADDR
 
     def _cpu_cycle(self) -> None:
-        if self.state == Execution_state.PAUSED.value:
+        if self.state == ExecutionState.PAUSED.value:
             return
 
-        opcode = self.memory[self.program_counter] << 8 | self.memory[self.program_counter + 1]
+        opcode = (
+            self.memory[self.program_counter] << 8
+            | self.memory[self.program_counter + 1]
+        )
         self._execute_instruction(opcode)
         self.program_counter += 0x200
 
@@ -37,8 +43,8 @@ class Chip8:
 
         y = (opcode & 0xF0) >> 8
 
-        opcode_execution[opcode & 0xF00](x, y)
+        OPCODE_EXECUTION[opcode & 0xF00](x, y)
 
 
 if __name__ == "__main__":
-    Chip8('input', 'sound_interface', 'renderer')
+    Chip8("input", "sound_interface", "renderer")
